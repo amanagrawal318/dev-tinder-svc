@@ -1,9 +1,17 @@
 const express = require("express");
+const { AdminAuth, isUserLogin } = require("./Middleware/auth");
 const app = express();
-const port = 3000;
+const port = 5000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.use("/admin", AdminAuth);
+
+app.get("/admin/getAdmin", (req, res) => {
+  console.log("Admin get");
+  res.send("Admin fetched");
+});
+
+app.get("/user/getuser", isUserLogin, (req, res) => {
+  res.send("User Fetched");
 });
 
 app.listen(port, () => {
