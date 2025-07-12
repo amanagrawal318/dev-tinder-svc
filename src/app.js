@@ -3,6 +3,13 @@ const { AdminAuth, isUserLogin } = require("./Middleware/auth");
 const app = express();
 const port = 5000;
 
+// app.use("/", (err, req, res, next) => {
+//   if (err) {
+//     console.log(err);
+//     res.status(401).send("Unauthorized");
+//   }
+// });
+
 app.use("/admin", AdminAuth);
 
 app.get("/admin/getAdmin", (req, res) => {
