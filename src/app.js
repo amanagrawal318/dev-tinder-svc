@@ -1,14 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const connectDB = require("./config/database");
 const validator = require("validator");
 const User = require("./Models/User");
 const validateData = require("./utils/vaildation");
+const { userAuth } = require("./Middleware/auth");
+const cookieParser = require("cookie-parser");
 const app = express();
 const port = 5000;
 
 app.use(express.json());
+app.use(cookieParser());
 
 // POST: Signup API
 app.post("/signup", async (req, res) => {
@@ -38,9 +42,6 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      throw new Error("Email and password are required");
-    }
     if (!validator.isEmail(email)) {
       throw new Error("Enter Valid Email");
     }
@@ -52,20 +53,22 @@ app.post("/login", async (req, res) => {
     if (!isValidPassword) {
       throw new Error("Invalid credentials");
     }
-    res.send("User logged in successfully");
+
+    //create a jwt token
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+    res.cookie("token", token, { maxAge: 86400000 });
+    res.send("User logged in successfully ");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET: get user
-app.get("/user", async (req, res) => {
-  const email = req.body.email;
+// GET: get profile
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
+    const user = req.user;
     res.send(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -73,7 +76,7 @@ app.get("/user", async (req, res) => {
 });
 
 // GET: get feed
-app.get("/feed", async (req, res) => {
+app.get("/feed", userAuth, async (req, res) => {
   try {
     const users = await User.find({});
     res.send(users);
@@ -83,9 +86,9 @@ app.get("/feed", async (req, res) => {
 });
 
 // DELETE: delete user
-app.delete("/user/:userId", async (req, res) => {
+app.delete("/user", userAuth, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.userId);
+    const user = await User.findByIdAndDelete(req.user._id);
     res.send("user deleted successfully");
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -93,7 +96,7 @@ app.delete("/user/:userId", async (req, res) => {
 });
 
 // PATCH: update user
-app.patch("/user/:userId", async (req, res) => {
+app.patch("/user", userAuth, async (req, res) => {
   const data = req.body;
   try {
     const ALLOWED_UPDATE_FIELDS = [
@@ -110,14 +113,23 @@ app.patch("/user/:userId", async (req, res) => {
     if (!isValidOperation) {
       throw new Error("Invalid update");
     }
-    const user = await User.findByIdAndUpdate(req.params?.userId, data, {
+    const user = await User.findByIdAndUpdate(req.user._id, data, {
       runValidators: true,
     });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      throw new Error({ message: "User not found" });
     }
-    console.log(user);
     res.send("user updated successfully");
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST: logout
+app.post("/logout", userAuth, (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.send("User logged out successfully");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
