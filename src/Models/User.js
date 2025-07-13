@@ -4,6 +4,9 @@ const UserSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 20,
     },
     lastName: {
       type: String,
@@ -11,6 +14,9 @@ const UserSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
     },
     password: {
       type: String,
@@ -18,6 +24,24 @@ const UserSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
+      default: 18,
+    },
+    gender: {
+      type: String,
+      // enum: ["male", "female", "other"],
+      validate(value) {
+        if (!["male", "female", "other"].includes(value)) {
+          throw new Error("Gender should be male, female or other");
+        }
+      },
+    },
+    about: {
+      type: String,
+      default: "I am a new user",
+    },
+    profileUrl: {
+      type: String,
+      default: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
     },
   },
   { timestamps: true }

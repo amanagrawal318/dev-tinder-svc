@@ -10,9 +10,9 @@ app.use(express.json());
 app.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    return res.status(400).json({ message: "User already exists" });
-  }
+  // if (existingUser) {
+  //   return res.status(400).json({ message: "User already exists" });
+  // }
 
   const user = new User({
     firstName,
@@ -63,7 +63,9 @@ app.delete("/user/:userId", async (req, res) => {
 app.patch("/user/:userId", async (req, res) => {
   const data = req.body;
   try {
-    const user = await User.findByIdAndUpdate(req.params.userId, data);
+    const user = await User.findByIdAndUpdate(req.params.userId, data, {
+      runValidators: true,
+    });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
