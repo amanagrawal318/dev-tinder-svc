@@ -1,27 +1,32 @@
 require("dotenv").config();
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const connectDB = require("./config/database");
 const User = require("./Models/User");
+const validateData = require("./utils/vaildation");
 const app = express();
 const port = 5000;
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
-  const existingUser = await User.findOne({ email });
-  // if (existingUser) {
-  //   return res.status(400).json({ message: "User already exists" });
-  // }
-
-  const user = new User({
-    firstName,
-    lastName,
-    email,
-    password,
-  });
-
   try {
+    validateData(req.body);
+    const { firstName, lastName, email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
     await user.save();
     res.send("User saved successfully");
   } catch (error) {
