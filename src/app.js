@@ -63,7 +63,21 @@ app.delete("/user/:userId", async (req, res) => {
 app.patch("/user/:userId", async (req, res) => {
   const data = req.body;
   try {
-    const user = await User.findByIdAndUpdate(req.params.userId, data, {
+    const ALLOWED_UPDATE_FIELDS = [
+      "firstName",
+      "lastName",
+      "gender",
+      "about",
+      "profileUrl",
+      "skills",
+    ];
+    const isValidOperation = Object.keys(data).every((update) =>
+      ALLOWED_UPDATE_FIELDS.includes(update)
+    );
+    if (!isValidOperation) {
+      throw new Error("Invalid update");
+    }
+    const user = await User.findByIdAndUpdate(req.params?.userId, data, {
       runValidators: true,
     });
     if (!user) {

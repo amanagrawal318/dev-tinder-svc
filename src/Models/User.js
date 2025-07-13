@@ -43,6 +43,15 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
     },
+    skills: {
+      type: [String],
+      default: [],
+      validate(value) {
+        if (value.length > 10) {
+          throw new Error("Skills should be less than 10");
+        }
+      },
+    },
   },
   { timestamps: true }
 );
