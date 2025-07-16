@@ -2,7 +2,7 @@ const express = require("express");
 const authRouter = express.Router();
 const bcrypt = require("bcryptjs");
 const User = require("../Models/User");
-const validateData = require("../utils/vaildation");
+const { validateData } = require("../utils/vaildation");
 const validator = require("validator");
 
 // POST: Signup API
@@ -52,6 +52,12 @@ authRouter.post("/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  res
+    .cookie("token", null, { expires: new Date(Date.now()) })
+    .send("User logged out successfully");
 });
 
 module.exports = authRouter;
