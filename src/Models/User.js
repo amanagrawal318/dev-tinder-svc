@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       minLength: 3,
       maxLength: 20,
+      index: true,
     },
     lastName: {
       type: String,
@@ -42,11 +43,15 @@ const UserSchema = new mongoose.Schema(
     gender: {
       type: String,
       // enum: ["male", "female", "other"],
-      validate(value) {
-        if (!["male", "female", "other"].includes(value)) {
-          throw new Error("Gender should be male, female or other");
-        }
+      enum: {
+        values: ["male", "female", "other"],
+        message: "{VALUE} should be male, female or other",
       },
+      // validate(value) {
+      // if (!["male", "female", "other"].includes(value)) {
+      //   throw new Error("Gender should be male, female or other");
+      // }
+      // },*/
     },
     about: {
       type: String,

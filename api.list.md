@@ -1,9 +1,11 @@
 # DevTinder APIs
 
 ## AuthRouter
-- POST /signup
-- POST /login
-- POST /logout
+- POST /auth/signup
+- POST /auth/login
+- POST /auth/logout
+- POST /auth/forgot-password - sent OTP to email 
+- POST /auth/update-password - verify OTP and update password
 
 ## profileRouter
 - GET /profile/view
@@ -11,8 +13,8 @@
 - PATCH /profile/password
 
 ## connectionRequestRouter
-- POST /request/send/interest/:userId
-- POST /request/send/ignored/:userId
+- POST /request/send/:status/:toUserId
+
 - POST /request/review/accepted/:requestId
 - POST /request/review/rejected/:requestId
 
