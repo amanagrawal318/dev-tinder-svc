@@ -5,16 +5,23 @@ const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocs = require("./swagger");
 const app = express();
 const port = 5000;
 
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
-
+// Debugging endpoint to view Swagger schema
+app.get("/swagger.json", (req, res) => {
+  res.json(swaggerDocs);
+});
 /*
 // GET: get feed
 app.get("/feed", userAuth, async (req, res) => {
@@ -82,6 +89,9 @@ connectDB()
     console.log("Database connected");
     app.listen(port, () => {
       console.log(`server is listening at http://localhost:${port}`);
+      console.log(
+        `Swagger docs available at http://localhost:${port}/api-docs`
+      );
     });
   })
   .catch((err) => console.log("Database connection error", err));
