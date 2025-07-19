@@ -2,7 +2,7 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const authPath = require("./swaggerPath/auth");
 const profilePath = require("./swaggerPath/profile");
 const requestPath = require("./swaggerPath/request");
-
+const userPath = require("./swaggerPath/user");
 // Swagger configuration options
 const swaggerOptions = {
   definition: {
@@ -21,6 +21,7 @@ const swaggerOptions = {
       ...authPath,
       ...profilePath,
       ...requestPath,
+      ...userPath,
     },
   },
   apis: ["./src/routes/*.js"], // Path to the API route files
