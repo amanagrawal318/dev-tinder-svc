@@ -7,6 +7,7 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./swagger");
+const userRouter = require("./routes/user");
 const app = express();
 const port = 5000;
 
@@ -18,6 +19,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
+app.use("/user", userRouter);
+
 // Debugging endpoint to view Swagger schema
 app.get("/swagger.json", (req, res) => {
   res.json(swaggerDocs);
