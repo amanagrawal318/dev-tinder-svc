@@ -51,7 +51,9 @@ authRouter.post("/login", async (req, res) => {
     //create a jwt token
     const token = user.getJWT();
     res.cookie("token", token, { maxAge: 86400000 });
-    res.send("User logged in successfully ");
+    const userData = user.toObject();
+    delete userData.password;
+    res.json(userData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

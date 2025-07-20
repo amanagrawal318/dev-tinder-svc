@@ -8,9 +8,16 @@ const requestRouter = require("./routes/request");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./swagger");
 const userRouter = require("./routes/user");
+const cors = require("cors");
 const app = express();
 const port = 5000;
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
