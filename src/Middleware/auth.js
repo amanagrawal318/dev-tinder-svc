@@ -5,19 +5,19 @@ const userAuth = async (req, res, next) => {
   try {
     const token = req.cookies["token"];
     if (!token) {
-      throw new Error("Token not found");
+      return res.status(401).send("Unauthorized");
     }
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 
     const { _id } = decoded;
     const user = await User.findById(_id);
     if (!user) {
-      throw new Error("User not found");
+      return res.status(401).send("Unauthorized");
     }
     req.user = user;
     next();
   } catch (error) {
-    res.status(400).json("Error: " + error.message);
+    return res.status(400).json("Error: " + error.message);
   }
 };
 

@@ -3,7 +3,7 @@ const { userAuth } = require("../Middleware/auth");
 const userRouter = express.Router();
 const ConnectionRequest = require("../Models/connectionRequest");
 const User = require("../Models/User");
-const POPULATE_FIELDS = "firstName lastName profileUrl age gender";
+const POPULATE_FIELDS = "firstName lastName profileUrl age gender about skills";
 
 // GET: get received connection requests
 userRouter.get("/requests/received", userAuth, async (req, res) => {
@@ -67,7 +67,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     limit = limit > 50 ? 50 : limit;
-    
+
     const connectionRequest = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select("fromUserId toUserId");
