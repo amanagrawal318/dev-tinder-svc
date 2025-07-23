@@ -22,8 +22,14 @@ profileRouter.patch("/edit", userAuth, async (req, res) => {
     }
     const user = req.user;
     Object.keys(req.body).forEach((field) => (user[field] = req.body[field]));
-    user.save();
-    res.send({ user, message: "Profile updated successfully", status: 200 });
+    await user.save();
+    const userObj = user.toObject ? user.toObject() : { ...user };
+    delete userObj.password;
+    res.send({
+      user: userObj,
+      message: "Profile updated successfully",
+      status: 200,
+    });
   } catch (error) {
     res.status(500).send("ERROR: " + error.message);
   }
@@ -34,7 +40,7 @@ profileRouter.patch("/password", userAuth, async (req, res) => {
     const { password } = req.body;
     if (!validator.isStrongPassword(password)) {
       throw new Error(
-        "Password should be strong. Your password should be at least 8 characters long, contain at least one lowercase letter, one uppercase letter, one number and one special character"
+        "Password should be strong. It should contain at least 8 characters , one lowercase letter, one uppercase letter, one number and one special character"
       );
     }
     const user = req.user;

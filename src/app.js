@@ -21,8 +21,10 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// Swagger docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+// Routers
 app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
