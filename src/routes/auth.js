@@ -25,8 +25,12 @@ authRouter.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    await user.save();
-    res.send("User saved successfully");
+    const savedUser = await user.save();
+    const token = savedUser.getJWT();
+    res.cookie("token", token, { maxAge: 86400000 });
+    const userData = savedUser.toObject();
+    delete userData.password;
+    res.json(userData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
