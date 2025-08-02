@@ -4,6 +4,8 @@ const requestRouter = express.Router();
 const { userAuth } = require("../Middleware/auth");
 const ConnectionRequest = require("../Models/connectionRequest");
 const User = require("../Models/User");
+// const sendAWSEmail = require("../utils/sendAWSEmail.js");
+
 // POST: send connection request
 requestRouter.post("/send/:status/:toUserId", userAuth, async (req, res) => {
   try {
@@ -37,6 +39,11 @@ requestRouter.post("/send/:status/:toUserId", userAuth, async (req, res) => {
       status,
     });
     const savedRequest = await connectionRequest.save();
+    // const response = await sendAWSEmail.run(
+    //   " Connection Request",
+    //   `${req.user.firstName} sent ${status} connection request to ${toUser.firstName}`
+    // );
+    // console.log("Email sent successfully:", response);
     res.send({
       message: `${req.user.firstName} sent ${status} connection request to ${toUser.firstName}`,
       status: 200,
