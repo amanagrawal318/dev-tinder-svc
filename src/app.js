@@ -9,6 +9,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./swagger");
 const userRouter = require("./routes/user");
 const cors = require("cors");
+require("./utils/cronJob"); // Importing the cron job
 const app = express();
 const port = 5000;
 
