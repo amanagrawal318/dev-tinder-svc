@@ -11,8 +11,12 @@
 ## profileRouter
 
 - GET /profile/view
+- GET /profile/view/:userId
 - PATCH /profile/edit
 - PATCH /profile/password
+- POST /profile/block-user/:userId
+- Delete /profile/unblock-user/:userId
+
 
 ## connectionRequestRouter
 

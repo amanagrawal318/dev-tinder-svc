@@ -5,6 +5,7 @@ const { validateProfileFields } = require("../utils/vaildation");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const User = require("../Models/User");
+const BlockedUser = require("../Models/BlockedUser");
 // GET: get profile
 profileRouter.get("/view", userAuth, async (req, res) => {
   try {
@@ -78,4 +79,50 @@ profileRouter.patch("/password", userAuth, async (req, res) => {
   }
 });
 
+profileRouter.post("/block-user/:userId", userAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId || !validator.isMongoId(userId)) {
+      return res.status(400).send({ message: "Invalid userId" });
+    }
+
+    const isUserIdExist = await User.findById(userId);
+    if (!isUserIdExist) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    const blockedUser = new BlockedUser({
+      blockedUserId: userId,
+      blockedByUserId: req.user._id,
+    });
+    await blockedUser.save();
+    res.send({ message: "User blocked successfully", status: 200 });
+  } catch (error) {
+    res.status(500).send("ERROR: " + error.message);
+  }
+});
+
+profileRouter.delete("/unblock-user/:userId", userAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId || !validator.isMongoId(userId)) {
+      return res.status(400).send({ message: "Invalid userId" });
+    }
+    const isUserIdExist = await User.findById(userId);
+    if (!isUserIdExist) {
+      return res.status(404).send({ message: "User not found" });
+    }
+    const unblockedUser = await BlockedUser.findOneAndDelete({
+      blockedUserId: userId,
+      blockedByUserId: req.user._id,
+    });
+    if (!unblockedUser) {
+      return res.status(404).send({ message: "User not found" });
+    }
+    res.send({ message: "User unblocked successfully", status: 200 });
+  } catch (error) {
+    res.status(500).send("ERROR: " + error.message);
+  }
+});
 module.exports = profileRouter;

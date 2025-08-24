@@ -4,7 +4,7 @@ const userRouter = express.Router();
 const ConnectionRequest = require("../Models/connectionRequest");
 const User = require("../Models/User");
 const POPULATE_FIELDS = "firstName lastName profileUrl age gender about skills";
-
+const BlockedUser = require("../Models/BlockedUser");
 // GET: get received connection requests
 userRouter.get("/requests/received", userAuth, async (req, res) => {
   try {
@@ -50,10 +50,38 @@ userRouter.get("/connections", userAuth, async (req, res) => {
       }
     });
 
+    const blockedUsers = await BlockedUser.find({
+      $or: [
+        { blockedUserId: loggedInUser._id },
+        { blockedByUserId: loggedInUser._id },
+      ],
+    }).select("blockedUserId blockedByUserId");
+
+    const updatedData = data.map((user) => {
+      const userBlocked = blockedUsers.find(
+        (blockedUser) =>
+          (blockedUser.blockedUserId.equals(user._id) &&
+            blockedUser.blockedByUserId.equals(loggedInUser._id)) ||
+          (blockedUser.blockedUserId.equals(loggedInUser._id) &&
+            blockedUser.blockedByUserId.equals(user._id))
+      );
+
+      if (!userBlocked) {
+        return user;
+      }
+      if (userBlocked.blockedByUserId.equals(loggedInUser._id)) {
+        return { ...user.toObject(), isBlocked: true };
+      }
+      if (userBlocked.blockedUserId.equals(loggedInUser._id)) {
+        return;
+      }
+      return user;
+    }).filter(Boolean);
+
     res.send({
       message: "Connections fetched successfully",
       status: 200,
-      data,
+      data: updatedData,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -76,6 +104,21 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     connectionRequest.forEach((request) => {
       hideUsersFromFeed.add(request.fromUserId.toString());
       hideUsersFromFeed.add(request.toUserId.toString());
+    });
+
+    const blockedUsers = await BlockedUser.find({
+      $or: [
+        { blockedUserId: loggedInUser._id },
+        { blockedByUserId: loggedInUser._id },
+      ],
+    }).select("blockedUserId blockedByUserId");
+
+    blockedUsers.forEach((block) => {
+      if (block.blockedByUserId.equals(loggedInUser._id)) {
+        hideUsersFromFeed.add(block.blockedUserId.toString());
+      } else {
+        hideUsersFromFeed.add(block.blockedByUserId.toString());
+      }
     });
 
     const data = await User.find({
