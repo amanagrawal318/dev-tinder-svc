@@ -4,10 +4,36 @@ const { userAuth } = require("../Middleware/auth");
 const { validateProfileFields } = require("../utils/vaildation");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const User = require("../Models/User");
 // GET: get profile
 profileRouter.get("/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
+    res.send({ user, message: "Profile fetched successfully", status: 200 });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+profileRouter.get("/view/:userId", userAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId || !validator.isMongoId(userId)) {
+      return res.status(400).send({ message: "Invalid userId" });
+    }
+
+    if (req.user._id.toString() === userId) {
+      return res.send({
+        user: req.user,
+        message: "Profile fetched successfully",
+        status: 200,
+      });
+    }
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
     res.send({ user, message: "Profile fetched successfully", status: 200 });
   } catch (error) {
     res.status(500).json({ message: error.message });
