@@ -125,4 +125,16 @@ profileRouter.delete("/unblock-user/:userId", userAuth, async (req, res) => {
     res.status(500).send("ERROR: " + error.message);
   }
 });
+
+// DELETE: delete profile
+profileRouter.delete("/delete", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    await User.findByIdAndDelete(user._id);
+    res.send({ message: "Profile deleted successfully", status: 200 });
+  } catch (error) {
+    res.status(500).send("ERROR: " + error.message);
+  }
+});
+
 module.exports = profileRouter;
