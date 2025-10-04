@@ -18,4 +18,4 @@ const ProfileImageStorage = new CloudinaryStorage({
 
 const uploadProfileImageCloudinary = multer({ storage: ProfileImageStorage });
 
-module.exports = uploadProfileImageCloudinary;
+module.exports = { uploadProfileImageCloudinary, cloudinary };

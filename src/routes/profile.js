@@ -6,7 +6,12 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const User = require("../Models/User");
 const BlockedUser = require("../Models/BlockedUser");
-const uploadProfileImageCloudinary = require("../config/cloudinary");
+const {
+  uploadProfileImageCloudinary,
+  cloudinary,
+} = require("../config/cloudinary");
+const { extractPublicId } = require("../utils/constant");
+
 // GET: get profile
 profileRouter.get("/view", userAuth, async (req, res) => {
   try {
@@ -147,9 +152,16 @@ profileRouter.post(
       if (!req.file || !req.file.path) {
         return res.status(400).send({ message: "Image is required" });
       }
-
-      const imageUrl = req.file.path;
       const user = req.user;
+
+      // If user already has an image, delete old one from Cloudinary
+      if (user.profileUrl && user.profileUrl.includes("cloudinary.com")) {
+        const oldPublicId = extractPublicId(user.profileUrl);
+        await cloudinary.uploader.destroy(oldPublicId);
+      }
+
+      // update user's profileUrl in database
+      const imageUrl = req.file.path;
       user.profileUrl = imageUrl;
       await user.save();
       return res.send({
