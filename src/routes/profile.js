@@ -6,6 +6,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const User = require("../Models/User");
 const BlockedUser = require("../Models/BlockedUser");
+const uploadProfileImageCloudinary = require("../config/cloudinary");
 // GET: get profile
 profileRouter.get("/view", userAuth, async (req, res) => {
   try {
@@ -136,5 +137,30 @@ profileRouter.delete("/delete", userAuth, async (req, res) => {
     res.status(500).send("ERROR: " + error.message);
   }
 });
+
+profileRouter.post(
+  "/upload-profile-image",
+  userAuth,
+  uploadProfileImageCloudinary.single("ProfileImage"),
+  async (req, res, next) => {
+    try {
+      if (!req.file || !req.file.path) {
+        return res.status(400).send({ message: "Image is required" });
+      }
+
+      const imageUrl = req.file.path;
+      const user = req.user;
+      user.profileUrl = imageUrl;
+      await user.save();
+      return res.send({
+        message: "Profile image uploaded successfully",
+        profileUrl: imageUrl,
+        status: 200,
+      });
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  }
+);
 
 module.exports = profileRouter;
