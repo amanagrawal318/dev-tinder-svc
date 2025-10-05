@@ -85,6 +85,18 @@ UserSchema.methods.getJWT = function () {
   });
 };
 
+UserSchema.methods.getAccessToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: "5m", // short-lived
+  });
+};
+
+UserSchema.methods.getRefreshToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: "7d", // long-lived
+  });
+};
+
 UserSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };

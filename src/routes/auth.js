@@ -26,11 +26,20 @@ authRouter.post("/signup", async (req, res) => {
     });
 
     const savedUser = await user.save();
-    const token = savedUser.getJWT();
-    res.cookie("token", token, { maxAge: 86400000 });
+    const accessToken = savedUser.getAccessToken();
+    const refreshToken = savedUser.getRefreshToken();
     const userData = savedUser.toObject();
     delete userData.password;
-    res.json(userData);
+    res
+      .cookie("accessToken", accessToken, {
+        maxAge: 5 * 60 * 1000,
+        httpOnly: true,
+      })
+      .cookie("refreshToken", refreshToken, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      })
+      .json(userData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -53,19 +62,54 @@ authRouter.post("/login", async (req, res) => {
     }
 
     //create a jwt token
-    const token = user.getJWT();
-    res.cookie("token", token, { maxAge: 86400000 });
+    const accessToken = user.getAccessToken();
+    const refreshToken = user.getRefreshToken();
     const userData = user.toObject();
     delete userData.password;
-    res.json(userData);
+    res
+      .cookie("accessToken", accessToken, {
+        maxAge: 5 * 60 * 1000,
+        httpOnly: true,
+      })
+      .cookie("refreshToken", refreshToken, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      })
+      .json(userData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
+// POST: Refresh Token
+authRouter.post("/refresh-token", async (req, res) => {
+  try {
+    const refreshToken = req.cookies["refreshToken"];
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token" });
+    }
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+    const accessToken = user.getAccessToken();
+    res
+      .cookie("accessToken", accessToken, {
+        maxAge: 5 * 60 * 1000,
+        httpOnly: true,
+      })
+      .json({ message: "Token refreshed successfully" });
+  } catch (error) {
+    res.status(401).json({ message: "Invalid or expired refresh token" });
+  }
+});
+
+// POST: Logout
 authRouter.post("/logout", async (req, res) => {
   res
-    .cookie("token", null, { expires: new Date(Date.now()) })
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
     .send("User logged out successfully");
 });
 
