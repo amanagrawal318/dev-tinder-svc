@@ -3,7 +3,7 @@ const { userAuth } = require("../Middleware/auth");
 const userRouter = express.Router();
 const ConnectionRequest = require("../Models/connectionRequest");
 const User = require("../Models/User");
-const POPULATE_FIELDS = "firstName lastName profileUrl age gender about skills";
+const POPULATE_FIELDS = "firstName lastName profileUrl age gender about skills lastActiveAt";
 const BlockedUser = require("../Models/BlockedUser");
 // GET: get received connection requests
 userRouter.get("/requests/received", userAuth, async (req, res) => {

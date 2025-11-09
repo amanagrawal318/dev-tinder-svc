@@ -64,6 +64,10 @@ authRouter.post("/login", async (req, res) => {
     //create a jwt token
     const accessToken = user.getAccessToken();
     const refreshToken = user.getRefreshToken();
+    // set the current time as last active time
+    user.lastActiveAt = Date.now();
+    await user.save();
+
     const userData = user.toObject();
     delete userData.password;
     res
