@@ -69,18 +69,28 @@ paymentRouter.get("/membership/payment-status", userAuth, async (req, res) => {
     });
 
     if (!paymentInfo) {
-      return res.status(404).json({ error: "No payment information found for the user." });
+      return res
+        .status(404)
+        .json({ error: "No payment information found for the user." });
     }
 
     // Retrieve the Stripe session and payment intent
-    const session = await stripe.checkout.sessions.retrieve(paymentInfo.stripeSessionId);
+    const session = await stripe.checkout.sessions.retrieve(
+      paymentInfo.stripeSessionId
+    );
     if (!session || !session.payment_intent) {
-      return res.status(404).json({ error: "Stripe session or payment intent not found." });
+      return res
+        .status(404)
+        .json({ error: "Stripe session or payment intent not found." });
     }
 
-    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      session.payment_intent
+    );
     if (!paymentIntent) {
-      return res.status(404).json({ error: "Stripe payment intent not found." });
+      return res
+        .status(404)
+        .json({ error: "Stripe payment intent not found." });
     }
 
     // Update payment info only if the status has changed
@@ -96,13 +106,21 @@ paymentRouter.get("/membership/payment-status", userAuth, async (req, res) => {
       user.isPremium = true;
       user.planType = paymentInfo.subscriptionPlanType;
       await user.save();
+      return res.json({
+        status: paymentInfo.status,
+        user: { isPremium: user.isPremium, planType: user.planType },
+      });
     }
 
     // Respond with the updated payment info
-    res.json(paymentInfo);
+    res.json({
+      status: paymentInfo.status,
+    });
   } catch (err) {
     console.error("Error in payment status route:", err);
-    res.status(500).json({ error: "An error occurred while fetching payment status." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching payment status." });
   }
 });
 
