@@ -8,6 +8,7 @@ const requestRouter = require("./routes/request");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./swagger");
 const userRouter = require("./routes/user");
+const paymentRouter = require("./routes/payment");
 const cors = require("cors");
 require("./utils/cronJob"); // Importing the cron job
 const app = express();
@@ -30,6 +31,7 @@ app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
 app.use("/user", userRouter);
+app.use("/payment", paymentRouter);
 
 // Debugging endpoint to view Swagger schema
 app.get("/swagger.json", (req, res) => {

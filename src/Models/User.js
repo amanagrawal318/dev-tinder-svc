@@ -75,6 +75,14 @@ const UserSchema = new mongoose.Schema(
         }
       },
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    planType: {
+      type: String,
+      enum: ["SILVER", "GOLD"],
+    },
     lastActiveAt: {
       type: Date,
       default: Date.now,
